@@ -1,5 +1,8 @@
 #lang eopl
-;Autores: Nombre1 Codigo1, Nombre2 Codigo2
+;Autores: Andres Felipe Quiceno gil Codigo:2477362
+;Yonier Alejandro Vega Rojas Codigo:2477056
+;Jhon Fabricio Hurtado Marin Codigo: 2459472
+;Juan Esteban Aguirre Castañeda Codigo:2459676
 
 ;; Taller 2 — El intérprete de Cauca.
 ;; El punto de entrada y el REPL. Requiere sintaxis.rkt e interprete.rkt.
@@ -12,7 +15,7 @@
 ;; resultante con evaluar-programa.
 (define interpretar
   (lambda (texto)
-    (eopl:error 'interpretar "Sin implementar")))
+    (evaluar-programa (parser texto))))
 
 ;; interpretador : -> void
 ;; REPL de Cauca, que se abre con (interpretador). Se construye con
@@ -20,6 +23,11 @@
 ;; da sllgen:make-stream-parser.
 (define interpretador
   (lambda ()
-    (eopl:error 'interpretador "Sin implementar")))
+    (sllgen:make-rep-loop
+     "--> "
+     evaluar-programa
+     (sllgen:make-stream-parser
+      especificacion-lexica
+      especificacion-gramatical))))
 
 (provide (all-defined-out))

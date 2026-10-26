@@ -1,56 +1,139 @@
+
 #lang eopl
-;Autores: Nombre1 Codigo1, Nombre2 Codigo2
+;Autores: Andres Felipe Quiceno gil Codigo:2477362
+;Yonier Alejandro Vega Rojas Codigo:2477056
+;Jhon Fabricio Hurtado Marin Codigo: 2459472
+;Juan Esteban Aguirre Castañeda Codigo:2459676
 
 ;; Taller 2 — El intérprete de Cauca.
-;; Especificación léxica, especificación gramatical, scanner y parser.
-;; Este módulo no requiere ningún otro.
-;;
-;; Lo que se escribe aquí:
-;;
-;;   especificacion-lexica      comentarios que empiezan con //, espacios
-;;                              en blanco, números enteros y flotantes con
-;;                              signo, e identificadores que empiezan por
-;;                              letra y siguen con letras, dígitos, guion
-;;                              bajo o signo de interrogación
-;;   especificacion-gramatical  las producciones de <programa>,
-;;                              <expresion> y <primitiva>, con los nombres
-;;                              de constructor que indican los recuadros
-;;                              del enunciado
-;;   scanner : string -> lista de tokens   se construye con
-;;                                         sllgen:make-string-scanner
-;;   parser  : string -> programa          se construye con
-;;                                         sllgen:make-string-parser
-;;
-;; La llamada a sllgen:make-define-datatypes genera los datatypes
-;; programa, expresion y primitiva a partir de la gramática, con sus
-;; constructores y sus predicados. Mientras la gramática esté vacía no
-;; genera ninguno.
+;; Especificación léxica, gramática, scanner y parser.
 
 (define especificacion-lexica
-  '())
+  '(
+    ;; Comentarios y espacios
+    (comentario ("//" (arbno (not #\newline))) skip)
+    (espacio-blanco (whitespace) skip)
+
+    ;; Identificadores
+    (identificador
+     (letter (arbno (or letter digit "_" "?")))
+     symbol)
+
+    ;; Numeros enteros positivos y negativos
+    (numero (digit (arbno digit)) number)
+    (numero ("-" digit (arbno digit)) number)
+
+    ;; Numeros flotantes positivos y negativos
+    (numero (digit (arbno digit) "." digit (arbno digit)) number)
+    (numero ("-" digit (arbno digit) "." digit (arbno digit)) number)
+    ))
 
 (define especificacion-gramatical
-  '())
+  '(
+    ;; Programa
+    (programa (expresion) a-program)
 
-(sllgen:make-define-datatypes especificacion-lexica especificacion-gramatical)
+    ;; Expresiones basicas
+    (expresion (numero) lit-exp)
+    (expresion (identificador) var-exp)
+    (expresion ("true") true-exp)
+    (expresion ("false") false-exp)
 
-;; mostrar-datatypes : -> void
-;; Lista en pantalla los datatypes que SLLGEN genera a partir de la
-;; gramática. Sirve para revisar los nombres de los constructores.
+    ;; Aplicacion de primitivas
+    (expresion
+     (primitiva "(" (separated-list expresion ",") ")")
+     prim-exp)
+
+    ;; Condicionales
+    (expresion
+     ("if" expresion "then" expresion "else" expresion "end")
+     if-exp)
+
+    ;; Ligadura local
+    (expresion
+     ("let" (arbno identificador "=" expresion)
+      "in" expresion "end")
+     let-exp)
+
+    ;; Procedimientos
+    (expresion
+     ("proc" "(" (separated-list identificador ",") ")"
+      expresion "end")
+     proc-exp)
+
+    ;; Aplicacion de procedimientos
+    (expresion
+     ("apply" expresion "(" (separated-list expresion ",") ")")
+     apply-exp)
+
+    ;; Recursion mediante letrec
+    (expresion
+     ("letrec"
+      (arbno identificador
+             "(" (separated-list identificador ",") ")"
+             "=" expresion)
+      "in" expresion "end")
+     letrec-exp)
+
+    ;; Seleccion mediante case
+    (expresion
+     ("case" expresion
+      (arbno "of" numero "=>" expresion)
+      "otherwise" "=>" expresion "end")
+     case-exp)
+
+    ;; Primitivas aritmeticas
+    (primitiva ("+") sum-prim)
+    (primitiva ("-") minus-prim)
+    (primitiva ("*") mult-prim)
+    (primitiva ("/") div-prim)
+    (primitiva ("add1") add-prim)
+    (primitiva ("sub1") sub-prim)
+
+    ;; Primitivas relacionales
+    (primitiva (">") mayor-prim)
+    (primitiva (">=") mayorigual-prim)
+    (primitiva ("<") menor-prim)
+    (primitiva ("<=") menorigual-prim)
+    (primitiva ("==") igual-prim)
+
+    ;; Primitivas booleanas originales
+    (primitiva ("not") not-prim)
+    (primitiva ("and") and-prim)
+    (primitiva ("or") or-prim)
+
+    ;; Primitivas adicionales
+    (primitiva ("xor") xor-prim)
+    (primitiva ("implica") implica-prim)
+    (primitiva ("abs") abs-prim)
+    (primitiva ("mcd") mcd-prim)
+    (primitiva ("mcm") mcm-prim)
+    (primitiva ("promedio") promedio-prim)
+    (primitiva ("entre") entre-prim)
+    ))
+
+;; Generacion de datatypes
+(sllgen:make-define-datatypes
+ especificacion-lexica
+ especificacion-gramatical)
+
+;; Mostrar los datatypes generados
 (define mostrar-datatypes
   (lambda ()
-    (sllgen:list-define-datatypes especificacion-lexica especificacion-gramatical)))
+    (sllgen:list-define-datatypes
+     especificacion-lexica
+     especificacion-gramatical)))
 
-;; scanner : string -> lista de tokens
-;; Convierte el texto de un programa en la lista de sus tokens.
+;; Scanner: convierte texto en tokens
 (define scanner
-  (lambda (texto)
-    (eopl:error 'scanner "Sin implementar")))
+  (sllgen:make-string-scanner
+   especificacion-lexica
+   especificacion-gramatical))
 
-;; parser : string -> programa
-;; Convierte el texto de un programa en su árbol de sintaxis abstracta.
+;; Parser: convierte texto en un programa
 (define parser
-  (lambda (texto)
-    (eopl:error 'parser "Sin implementar")))
+  (sllgen:make-string-parser
+   especificacion-lexica
+   especificacion-gramatical))
 
 (provide (all-defined-out))

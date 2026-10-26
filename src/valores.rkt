@@ -1,5 +1,8 @@
 #lang eopl
-;Autores: Nombre1 Codigo1, Nombre2 Codigo2
+;Autores: Andres Felipe Quiceno gil Codigo:2477362
+;Yonier Alejandro Vega Rojas Codigo:2477056
+;Jhon Fabricio Hurtado Marin Codigo: 2459472
+;Juan Esteban Aguirre Castañeda Codigo:2459676
 
 ;; Taller 2 — El intérprete de Cauca.
 ;; El valor procedimiento. Requiere sintaxis.rkt.
@@ -20,5 +23,19 @@
 ;; campo que queda sin verificar.
 
 (require "sintaxis.rkt")
+
+;;Creo datatype de la cerradura que va guardar el cuerpo del proc recursivo
+(define-datatype procval procval?
+  (cerradura
+   (ids (list-of symbol?))
+   (body expresion?)
+   (env (lambda (v) #t))))
+
+;; Tipo de dato: valor de procedimiento.
+;; Nombre: procval
+;; Contrato: procval = cerradura(ids, body, env)
+;; Propósito:
+;; Representar un procedimiento mediante una clausura que conserva
+;; sus parámetros, su cuerpo y el ambiente donde fue definido.
 
 (provide (all-defined-out))
