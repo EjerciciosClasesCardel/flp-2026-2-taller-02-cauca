@@ -1,5 +1,5 @@
 #lang eopl
-;Autores: Nombre1 Codigo1, Nombre2 Codigo2
+;Autores: Maria Fernanda Betancourt Montoya 2459510, Oliver De Jesus Arboleda Baez 2459684, Kevin Andres Rosero Romo 2459554
 
 ;; Taller 2 — El intérprete de Cauca.
 ;; El valor procedimiento. Requiere sintaxis.rkt.
@@ -20,5 +20,18 @@
 ;; campo que queda sin verificar.
 
 (require "sintaxis.rkt")
+
+;; procval
+;; Datatype del valor procedimiento. Una cerradura guarda los parámetros,
+;; el cuerpo sin evaluar y el ambiente de la definición, de modo que al
+;; invocarla el cuerpo se evalúe en el ambiente donde nació y no en el de
+;; la llamada.
+;;   procval?  : any -> boolean
+;;   cerradura : (list-of symbol?) x expresion? x any -> procval
+(define-datatype procval procval?
+  (cerradura
+   (ids (list-of symbol?))
+   (body expresion?)
+   (env (lambda (v) #t))))
 
 (provide (all-defined-out))
